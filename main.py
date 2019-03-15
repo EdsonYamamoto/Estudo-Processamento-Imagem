@@ -6,3 +6,4 @@ if __name__ == '__main__':
     aula = input()
     if aula is '1':
         aula1.Aula.escolher(object)
+
