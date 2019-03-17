@@ -1,6 +1,7 @@
 import cv2
 import json
 import time
+import numpy as np
 
 class Aula():
     def escolher(self):
@@ -38,8 +39,17 @@ class Aula():
 
         imgXGH= imgXGHOrig[0:200, 0:200].copy()
 
-        print(imgXGH.shape)
-        cv2.imshow("imgtrans1", imgXGH)
+        (wH, wW) = imgXGH.shape[:2]
+
+        (frame_h, frame_w) = imgXGH.shape[:2]
+
+        (B, G, R, A) = cv2.split(imgXGH)
+        B = cv2.bitwise_and(B, B, mask=A)
+        G = cv2.bitwise_and(G, G, mask=A)
+        R = cv2.bitwise_and(R, R, mask=A)
+        watermark = cv2.merge([B, G, R, A])
+
+        #cv2.imshow("imgtrans1", imgXGH)
 
         print("*****************************************************")
 
@@ -49,12 +59,20 @@ class Aula():
             img = cv2.imread(config[x]['caminho'])
 
             imgCopy = img[0:400, 0:400].copy()
-            imgCopy[0:200, 0:200] = imgXGH
+            #imgCopy[0:200, 0:200] = imgXGH
 
             print("Shape: ", img.shape)
             print("Size: ", img.size)
             print("Type: ", img.dtype)
 
+            (h, w) = imgCopy.shape[:2]
+            imgCopy = np.dstack([imgCopy, np.ones((h, w), dtype="uint8") * 255])
+
+            overlay = np.zeros((h, w, 4), dtype="uint8")
+            overlay[h - wH - 10:h - 10, w - wW - 10:w - 10] = watermark
+
+            imgCopy = cv2.addWeighted(overlay, 0.25, imgCopy, 1.0, 0)
+            #imgCopy = cv2.addWeighted(imgCopy[x + 1], 1.0, vetorImagens[x], 1 - fadein, 0)
 
             top = 20
             botton = 20
@@ -83,6 +101,9 @@ class Aula():
                             fadein = 1.0
 
                     time.sleep(2)
+
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    return
 
 
         cv2.waitKey()
