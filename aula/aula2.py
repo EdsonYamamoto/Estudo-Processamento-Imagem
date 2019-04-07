@@ -38,23 +38,19 @@ class Aula2():
         )
         data = np.copy(inputData)
 
-
         resultado = 0
 
         kernel = np.array((
             [1, 1, 1],
             [1, 1, 1],
             [1, 1, 1]), dtype="int")
-        print(data)
-        print(kernel)
-        for x in range(1, data.shape[0]-1):
-            for y in range(1, data.shape[1]-1):
-                if np.array_equal(kernel, data[x-1:x+2,y-1:y+2]):
-                    resultado = resultado + 1
-                    for xAux in range(-1, 2):
-                        for yAux in range(-1, 2):
-                            data[x+xAux][y+yAux] = 2
 
+        data, kernel, resultado = Aula2.Tentativa2(object, data, kernel, resultado)
+
+        print(inputData)
+        print(kernel)
+        print(data)
+        print("resultado: "+ str(resultado))
 
         for x in range (0,inputData.shape[0]):
             for y in range (0,inputData.shape[1]):
@@ -68,8 +64,6 @@ class Aula2():
                 if data[x][y] == 2:
                     data[x][y] = 124
 
-
-        output_image = data
         rate = 50
 
         kernel = (kernel + 1) * 127
@@ -82,9 +76,44 @@ class Aula2():
         cv2.imshow("Original", input_image)
         cv2.moveWindow("Original", 0, 200)
 
-        output_image = cv2.resize(output_image, None, fx=rate, fy=rate, interpolation=cv2.INTER_NEAREST)
+        output_image = cv2.resize(data, None, fx=rate, fy=rate, interpolation=cv2.INTER_NEAREST)
         cv2.imshow("Hit or Miss", output_image)
         cv2.moveWindow("Hit or Miss", 500, 200)
 
         cv2.waitKey()
         cv2.destroyAllWindows()
+
+    def Tentativa1(self, data, kernel, resultado):
+        for x in range(1, data.shape[0]-1):
+            for y in range(1, data.shape[1]-1):
+                matrix = data[x-1:x+2,y-1:y+2]
+                print("centro X:"+str(x+1)+" centro y:"+str(y+1))
+                print(matrix)
+                if np.array_equal(kernel, matrix):
+                    print("condição verdadeira")
+                    resultado = resultado + 1
+                    matrix = cv2.erode(matrix, kernel, iterations=1)
+                    for xAux in range(-1, 2):
+                        for yAux in range(-1, 2):
+                            data[x+xAux][y+yAux] = 2
+        return data, kernel, resultado
+
+    def Tentativa2(self, data, kernel, resultado):
+        data = cv2.erode(data, kernel, iterations=1)
+        for x in range(1, data.shape[0]-1):
+            for y in range(1, data.shape[1]-1):
+                if data[x+1][y+1] == 1:
+                    print("centro imagem!")
+                    for xAux in range(-1, 2):
+                        for yAux in range(-1, 2):
+                            data[x+xAux][y+yAux] = 2
+
+                """    
+                matrix = data[x-1:x+2,y-1:y+2]
+                print("centro X:"+str(x+1)+" centro y:"+str(y+1))
+                print(matrix)
+                if np.array_equal(kernel, matrix):
+                    print("condição verdadeira")
+                    resultado = resultado + 1
+                """
+        return data, kernel, resultado
