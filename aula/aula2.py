@@ -108,12 +108,4 @@ class Aula2():
                         for yAux in range(-1, 2):
                             data[x+xAux][y+yAux] = 2
 
-                """    
-                matrix = data[x-1:x+2,y-1:y+2]
-                print("centro X:"+str(x+1)+" centro y:"+str(y+1))
-                print(matrix)
-                if np.array_equal(kernel, matrix):
-                    print("condição verdadeira")
-                    resultado = resultado + 1
-                """
         return data, kernel, resultado
