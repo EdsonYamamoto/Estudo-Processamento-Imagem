@@ -29,10 +29,7 @@ class Aula3():
         _, thresh = cv2.threshold(img, 250, 250, cv2.THRESH_BINARY_INV)
         cv2.imshow("Thresh ", thresh)
 
-
-        # get contours
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
         height, width = img.shape
         min_x, min_y = width, height
         max_x = max_y = 0
@@ -51,9 +48,6 @@ class Aula3():
             cv2.putText(imgInicial, face, (x+int(w/2), y+int(h/2)), font, 1, (0))
 
 
-
-        #cv2.drawContours(img, contours, -1, (0, 255, 0), 3)
-
         cv2.imshow("ImagemFinal ", imgInicial)
 
 
@@ -68,9 +62,8 @@ class Aula3():
 
         _, thresh = cv2.threshold(subImg, 127, 255, cv2.THRESH_BINARY_INV)
         print("nome:",nome)
-        if nome is '1' :
-            cv2.imshow("Face1: " + nome , subImg)
-            cv2.imshow("TrashFace1: " + nome , thresh)
+        cv2.imshow("Face1: " + nome , subImg)
+        cv2.imshow("TrashFace1: " + nome , thresh)
 
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 

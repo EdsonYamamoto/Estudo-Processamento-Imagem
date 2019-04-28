@@ -3,12 +3,14 @@ import numpy as np
 import argparse
 from matplotlib import pyplot as plt
 
-font = cv2.FONT_HERSHEY_COMPLEX
+font = cv2.FONT_HERSHEY_TRIPLEX
 
 class Aula4():
     def escolher(self):
 
         Aula4.TarefaCasa(object)
+        #Aula4.FrameDados(object)
+
         #Aula4.TarefaTeste(object)
 
         cv2.waitKey()
@@ -17,33 +19,144 @@ class Aula4():
     def TarefaCasa(self):
         print("inciando")
         cap = cv2.VideoCapture('dados/aula4/Lancamento_de_dois_dados.mp4')
-        while (cap.isOpened()):
-            ret, frame = cap.read()
+        success,image = cap.read()
+        count = 0
+        success = True
+        while success:
+            success, frame = cap.read()
 
-            (height, width) = frame.shape[:2]
             #frame = cv2.resize(frame, (width/4, height/4),interpolation=cv2.INTER_AREA)
 
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
+            #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            '''
             print("255: "+str(frame.ravel()[255]))
             print("250: "+str(frame.ravel()[250]))
             print("245: "+str(frame.ravel()[245]))
             print("240: "+str(frame.ravel()[240]))
             print("235: "+str(frame.ravel()[235]))
-            if frame.ravel()[255] >50 and \
-                    frame.ravel()[250] > 50 and \
-                    frame.ravel()[245] > 60 and \
-                    frame.ravel()[240] > 60 :
-                cv2.imshow('frame', gray)
-            #teste = plt.hist(frame.ravel(), 256, [0, 256]);
-            #plt.show()
+            '''
 
+            frame = Aula4.EncontraDados(object, frame)
+            cv2.imshow('frame', frame)
+            '''
+            if frame.ravel()[255] >60 and \
+                    frame.ravel()[254] > 60 and \
+                    frame.ravel()[253] > 60 and \
+                    frame.ravel()[252] > 60 and \
+                    frame.ravel()[251] > 60 and \
+                    frame.ravel()[250] > 60 :
+            '''
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
         cap.release()
         cv2.destroyAllWindows()
 
+    def EncontraDados(self, imgInicial):
+
+        img = cv2.cvtColor(imgInicial.copy(), cv2.COLOR_BGR2GRAY)
+
+        kernel = np.ones((11, 11), np.uint8)
+        img = cv2.dilate(img, kernel, iterations=1)
+        img = cv2.erode(img, kernel, iterations=1)
+
+        _,thresh = cv2.threshold(img, 245, 250, cv2.THRESH_BINARY_INV)
+
+        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        # computes the bounding box for the contour, and draws it on the frame,
+        for contour in contours:
+
+            approx = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)
+            if len(approx) >= 6 and len(approx) <= 12 :
+
+                (x, y, w, h) = cv2.boundingRect(contour)
+
+                dados = img[y: y + h, x: x + w]
+
+                rect = cv2.minAreaRect(contour)
+                box = cv2.boxPoints(rect)
+                box = np.int0(box)
+
+                #cv2.drawContours(img, [box], 0, (0, 0, 255), 2)
+
+                img_crop, img_rot = Aula4.crop_rect(object, imgInicial, rect)
+
+                face = Aula4.EncontrarFaces(object, img_crop, dados)
+
+                cv2.putText(imgInicial, face, (x + int(w / 2), y + int(h / 2)), font, 1, (0))
+
+        return imgInicial
+
+    def crop_rect(self, img, rect):
+        # get the parameter of the small rectangle
+        center, size, angle = rect[0], rect[1], rect[2]
+        center, size = tuple(map(int, center)), tuple(map(int, size))
+
+        # get row and col num in img
+        height, width = img.shape[0], img.shape[1]
+
+        # calculate the rotation matrix
+        M = cv2.getRotationMatrix2D(center, angle, 1)
+        # rotate the original image
+        img_rot = cv2.warpAffine(img, M, (width, height))
+
+        # now rotated rectangle becomes vertical and we crop it
+        img_crop = cv2.getRectSubPix(img_rot, size, center)
+
+        return img_crop, img_rot
+
+
+    def EncontrarFaces(self, img, subImg):
+
+        gray = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2GRAY)
+
+
+        _,thresh = cv2.threshold(gray, 60, 250, cv2.THRESH_BINARY_INV)
+
+        kernel = np.ones((7, 7), np.uint8)
+        thresh = cv2.dilate(thresh, kernel, iterations=1)
+
+        cv2.imshow("tresh",thresh)
+
+        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        quantidadeCirculos=0
+
+        for contour in contours:
+
+            approx = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)
+            cv2.drawContours(gray, [approx], 0, (0), 5)
+
+            if len(approx)>=5:
+                quantidadeCirculos += 1
+        return str(quantidadeCirculos)
+
+    def FrameDados(self):
+
+        print("inciando")
+        img = cv2.imread('dados/aula4/FrameDados2.png',0)
+        plt.hist(img.ravel(),256,[0,256])
+        plt.show()
+
+        img2 = cv2.imread('dados/aula4/FrameDados3.png',0)
+        plt.hist(img2.ravel(),256,[0,256])
+        plt.show()
+        print("image1")
+        print("255: " + str(img.ravel()[255]))
+        print("254: " + str(img.ravel()[254]))
+        print("253: " + str(img.ravel()[253]))
+        print("252: " + str(img.ravel()[252]))
+        print("251: " + str(img.ravel()[251]))
+        print("250: " + str(img.ravel()[250]))
+
+        print("image2")
+        print("255: " + str(img2.ravel()[255]))
+        print("254: " + str(img2.ravel()[254]))
+        print("253: " + str(img2.ravel()[253]))
+        print("252: " + str(img2.ravel()[252]))
+        print("251: " + str(img2.ravel()[251]))
+        print("250: " + str(img2.ravel()[250]))
 
     def TarefaTeste(self):
         print("inciando")
@@ -146,52 +259,3 @@ class Aula4():
 
         capture.release()
         cv2.destroyAllWindows()
-
-    def EncontrarFaces(self, nome , img, subImg):
-
-        _, thresh = cv2.threshold(subImg, 127, 255, cv2.THRESH_BINARY_INV)
-        print("nome:",nome)
-        if nome is '1' :
-            cv2.imshow("Face1: " + nome , subImg)
-            cv2.imshow("TrashFace1: " + nome , thresh)
-
-        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        height, width = subImg.shape
-        min_x, min_y = width, height
-        max_x = max_y = 0
-
-        quantidadeCirculos=0
-
-        for contour in contours:
-            (x, y, w, h) = cv2.boundingRect(contour)
-
-
-            approx = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)
-            cv2.drawContours(subImg, [approx], 0, (0), 5)
-            x = approx.ravel()[0]
-            y = approx.ravel()[1]
-
-            if len(approx)>=5:
-                quantidadeCirculos += 1
-        return str(quantidadeCirculos)
-    def Teste(self):
-
-
-        im = Aula3.CarregarImagem(object)
-
-        # Set up the detector with default parameters.
-        detector = cv2.SimpleBlobDetector_create()
-
-        # Detect blobs.
-        keypoints = detector.detect(im)
-
-        print("Blobs = ", len(keypoints))
-        for marker in keypoints:
-            # center
-            x, y = np.int(marker.pt[0]), np.int(marker.pt[1])
-            pos = np.int(marker.size / 2)
-            cv2.circle(im, (x, y), 3, 255, -1)
-            cv2.rectangle(im, (x - pos, y - pos), (x + pos, y + pos), 0, 1)
-
-        cv2.imshow("Blobs = " + str(len(keypoints)), im)
