@@ -62,7 +62,8 @@ class Aula4():
 
         _,thresh = cv2.threshold(img, 245, 250, cv2.THRESH_BINARY_INV)
 
-        _,contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        #_,contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # computes the bounding box for the contour, and draws it on the frame,
         for contour in contours:
@@ -109,14 +110,20 @@ class Aula4():
 
     def EncontrarFaces(self, img2, subImg):
         height, width = img2.shape[0], img2.shape[1]
-        offset = 4
-        maxOffset = 60
-        if height > offset and width >offset and height < maxOffset and width < maxOffset:
-            img = img2[offset:width+offset,offset:height+offset].copy()
+        offset = 3
+        maxOffset = 200
+        minOffset = 30
+        if height > offset+4 and width >offset+4 \
+            and height < maxOffset and width < maxOffset \
+            and height > minOffset and width > minOffset:
+            img = img2[offset:width-offset,offset:height-offset].copy()
+
+           # if height > width * 1.8 or width > height * 1.8 :
+
 
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-            _,thresh = cv2.threshold(gray, 100, 250, cv2.THRESH_BINARY_INV)
+            _,thresh = cv2.threshold(gray, 160, 250, cv2.THRESH_BINARY_INV)
 
             kernel = np.ones((4, 4), np.uint8)
             thresh = cv2.dilate(thresh, kernel, iterations=1)
@@ -125,7 +132,8 @@ class Aula4():
             cv2.imshow("tresh",thresh)
             cv2.imshow("gray",gray)
 
-            _,contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            #_,contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
             quantidadeCirculos=0
 
