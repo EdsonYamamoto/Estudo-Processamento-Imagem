@@ -56,13 +56,13 @@ class Aula4():
 
         img = cv2.cvtColor(imgInicial.copy(), cv2.COLOR_BGR2GRAY)
 
-        kernel = np.ones((11, 11), np.uint8)
+        kernel = np.ones((13, 13), np.uint8)
         img = cv2.dilate(img, kernel, iterations=1)
         img = cv2.erode(img, kernel, iterations=1)
 
         _,thresh = cv2.threshold(img, 245, 250, cv2.THRESH_BINARY_INV)
 
-        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        _,contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # computes the bounding box for the contour, and draws it on the frame,
         for contour in contours:
@@ -107,30 +107,36 @@ class Aula4():
         return img_crop, img_rot
 
 
-    def EncontrarFaces(self, img, subImg):
+    def EncontrarFaces(self, img2, subImg):
+        height, width = img2.shape[0], img2.shape[1]
+        offset = 4
+        maxOffset = 60
+        if height > offset and width >offset and height < maxOffset and width < maxOffset:
+            img = img2[offset:width+offset,offset:height+offset].copy()
 
-        gray = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2GRAY)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+            _,thresh = cv2.threshold(gray, 100, 250, cv2.THRESH_BINARY_INV)
 
-        _,thresh = cv2.threshold(gray, 60, 250, cv2.THRESH_BINARY_INV)
+            kernel = np.ones((4, 4), np.uint8)
+            thresh = cv2.dilate(thresh, kernel, iterations=1)
+            thresh = cv2.erode(thresh, kernel, iterations=1)
 
-        kernel = np.ones((7, 7), np.uint8)
-        thresh = cv2.dilate(thresh, kernel, iterations=1)
+            cv2.imshow("tresh",thresh)
+            cv2.imshow("gray",gray)
 
-        cv2.imshow("tresh",thresh)
+            _,contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            quantidadeCirculos=0
 
-        quantidadeCirculos=0
+            for contour in contours:
 
-        for contour in contours:
+                approx = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)
+                cv2.drawContours(gray, [approx], 0, (0), 5)
 
-            approx = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)
-            cv2.drawContours(gray, [approx], 0, (0), 5)
-
-            if len(approx)>=5:
-                quantidadeCirculos += 1
-        return str(quantidadeCirculos)
+                if len(approx)>=5:
+                    quantidadeCirculos += 1
+            return str(quantidadeCirculos)
 
     def FrameDados(self):
 
@@ -162,7 +168,7 @@ class Aula4():
         print("inciando")
 
         parser = argparse.ArgumentParser()
-        parser.add_argument('-f', '--file',default='dados/aula4/Lancamento_de_dois_dados.mp4', help='Path to video file (if not using camera)')
+        parser.add_argument('-f', '--file',default='/dados/aula4/Lancamento_de_dois_dados.mp4', help='Path to video file (if not using camera)')
         parser.add_argument('-c', '--color', type=str, default='gray',
                             help='Color space: "gray" (default), "rgb", or "lab"')
         parser.add_argument('-b', '--bins', type=int, default=16,
@@ -223,8 +229,8 @@ class Aula4():
             if resizeWidth > 0:
                 (height, width) = frame.shape[:2]
                 resizeHeight = int(float(resizeWidth / width) * height)
-                frame = cv2.resize(frame, (resizeWidth/4, resizeHeight/4),
-                                   interpolation=cv2.INTER_AREA)
+                #frame = cv2.resize(frame, (resizeWidth/4, resizeHeight/4),
+                #                   interpolation=cv2.INTER_AREA)
 
             # Normalize histograms based on number of pixels per frame.
             numPixels = np.prod(frame.shape[:2])
