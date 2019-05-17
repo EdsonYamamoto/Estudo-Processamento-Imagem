@@ -59,8 +59,8 @@ class Aula6():
             hls_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
 
             hue = hls_image[:, :, 0]
-
-            binary_hue = cv2.inRange(hue, 50, 100)
+        
+            binary_hue = cv2.inRange(hue, 50, 70)
 
             mask = np.zeros(hls_image.shape, dtype=np.uint8)
 
@@ -76,11 +76,10 @@ class Aula6():
             cv2.imwrite('fg.jpg', fg_key)
             keyed = cv2.add(bg_key, fg_key)
             cv2.imshow('frame', keyed)
+
             k = cv2.waitKey(33)
             if k == 27:  # ESC
                 break
-
-
 
 
     def carregarVideo(self):
@@ -88,5 +87,13 @@ class Aula6():
         return cap
 
     def carregarFundo(self):
-        img = cv2.imread('dados/aula6/fundo1.jpg')
+        pasta="dados/aula6/"
+        print("Escolha um fundo")
+        key = input()
+        if key is "1":
+            img = cv2.imread(pasta+'fundo1.jpg')
+        if key is "2":
+            img = cv2.imread(pasta+'fundo2.jpg')
+        if key is "3":
+            img = cv2.imread(pasta+'fundo3.jpg')
         return img
