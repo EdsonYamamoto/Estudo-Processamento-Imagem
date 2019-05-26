@@ -10,9 +10,9 @@ font = cv2.FONT_HERSHEY_TRIPLEX
 class Aula6():
     def escolher(self):
         img = Aula6.carregarFundo(object)
-        cap = Aula6.carregarVideo(object)
+        cap, verde = Aula6.carregarVideo(object)
 
-        Aula6.croma_key_teste3(object,cap,img)
+        Aula6.croma_key_teste3(object,cap,img, verde)
 
         cv2.waitKey()
         cv2.destroyAllWindows()
@@ -48,7 +48,7 @@ class Aula6():
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-    def croma_key_teste3(self, cap, img):
+    def croma_key_teste3(self, cap, img, verde):
         success = True
         while success:
             success, frame = cap.read()
@@ -58,9 +58,24 @@ class Aula6():
 
             hls_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
 
+            hls_image = cv2.medianBlur(hls_image, 5)
+
+            cv2.imshow('hls', hls_image)
+
             hue = hls_image[:, :, 0]
-        
-            binary_hue = cv2.inRange(hue, 50, 70)
+
+            #Green
+            lower_green = 50
+            upper_green = 60
+
+            lower_blue = 110 # np.array([110, 50, 50])
+            upper_blue = 130 #np.array([130, 255, 255])
+            #blue
+
+            if verde:
+                binary_hue = cv2.inRange(hue, lower_green, upper_green)
+            else:
+                binary_hue = cv2.inRange(hue, lower_blue, upper_blue)
 
             mask = np.zeros(hls_image.shape, dtype=np.uint8)
 
@@ -83,8 +98,28 @@ class Aula6():
 
 
     def carregarVideo(self):
-        cap = cv2.VideoCapture('dados/aula6/Green_Screen_Sample_1.mp4')
-        return cap
+        print("[0]Blue\n[1]Green video 1\n[2]Green video 2\n[3]Green video 3\n")
+        key = input()
+        verde = False
+
+        if key is "0":
+            cap = cv2.VideoCapture('dados/aula6/Blue_Screen_Sample.mp4')
+
+        if key is "1":
+            cap = cv2.VideoCapture('dados/aula6/Green_Screen_Sample_1.mp4')
+            verde = True
+
+
+        if key is "2":
+            cap = cv2.VideoCapture('dados/aula6/Green_Screen_Sample_2.mp4')
+            verde = True
+
+        if key is "3":
+            cap = cv2.VideoCapture('dados/aula6/Green_Screen_Sample_3.mp4')
+            verde = True
+
+
+        return cap, verde
 
     def carregarFundo(self):
         pasta="dados/aula6/"
