@@ -28,24 +28,9 @@ class Aula4():
             #frame = cv2.resize(frame, (width/4, height/4),interpolation=cv2.INTER_AREA)
 
             #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            '''
-            print("255: "+str(frame.ravel()[255]))
-            print("250: "+str(frame.ravel()[250]))
-            print("245: "+str(frame.ravel()[245]))
-            print("240: "+str(frame.ravel()[240]))
-            print("235: "+str(frame.ravel()[235]))
-            '''
 
             frame = Aula4.EncontraDados(object, frame)
             cv2.imshow('frame', frame)
-            '''
-            if frame.ravel()[255] >60 and \
-                    frame.ravel()[254] > 60 and \
-                    frame.ravel()[253] > 60 and \
-                    frame.ravel()[252] > 60 and \
-                    frame.ravel()[251] > 60 and \
-                    frame.ravel()[250] > 60 :
-            '''
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
@@ -62,7 +47,6 @@ class Aula4():
 
         _,thresh = cv2.threshold(img, 245, 250, cv2.THRESH_BINARY_INV)
 
-        #_,contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # computes the bounding box for the contour, and draws it on the frame,

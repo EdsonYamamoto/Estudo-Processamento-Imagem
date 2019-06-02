@@ -60,22 +60,19 @@ class Aula6():
 
             hls_image = cv2.medianBlur(hls_image, 5)
 
-            cv2.imshow('hls', hls_image)
-
             hue = hls_image[:, :, 0]
-
             #Green
             lower_green = 50
             upper_green = 60
 
-            lower_blue = 110 # np.array([110, 50, 50])
-            upper_blue = 130 #np.array([130, 255, 255])
+            lower_blue = 110
+            upper_blue = 130
             #blue
 
             if verde:
-                binary_hue = cv2.inRange(hue, lower_green, upper_green)
+               binary_hue = cv2.inRange(hue, lower_green, upper_green)
             else:
-                binary_hue = cv2.inRange(hue, lower_blue, upper_blue)
+               binary_hue = cv2.inRange(hue, lower_blue, upper_blue)
 
             mask = np.zeros(hls_image.shape, dtype=np.uint8)
 
@@ -85,8 +82,11 @@ class Aula6():
 
             blured = cv2.GaussianBlur(mask, (11, 11), 0)
             blured_inverted = cv2.bitwise_not(blured)
+
+
             bg_key = cv2.bitwise_and(background, blured)
             fg_key = cv2.bitwise_and(frame, blured_inverted)
+
             cv2.imwrite('bg.jpg', bg_key)
             cv2.imwrite('fg.jpg', fg_key)
             keyed = cv2.add(bg_key, fg_key)
